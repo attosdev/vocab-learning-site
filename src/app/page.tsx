@@ -1,8 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Home() {
+  const { user, profile, loading, signOut } = useAuth()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -11,12 +16,33 @@ export default function Home() {
           <h1 className="text-xl font-bold text-primary">📚 고등 어휘 마스터</h1>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">홈</Link>
+            {user && (
+              <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">대시보드</Link>
+            )}
             <Link href="/flashcard" className="text-sm font-medium hover:text-primary transition-colors">플래시카드</Link>
             <Link href="/quiz" className="text-sm font-medium hover:text-primary transition-colors">퀴즈</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">로그인</Button>
-            <Button size="sm">회원가입</Button>
+            {loading ? (
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            ) : user ? (
+              <>
+                {profile?.avatar_url && (
+                  <img src={profile.avatar_url} alt="Profile" className="w-8 h-8 rounded-full" />
+                )}
+                <span className="text-sm font-medium">{profile?.name || user.email}</span>
+                <Button variant="outline" size="sm" onClick={signOut}>로그아웃</Button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="outline" size="sm">로그인</Button>
+                </Link>
+                <Link href="/auth/login">
+                  <Button size="sm">회원가입</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -33,16 +59,33 @@ export default function Home() {
             플래시카드, 퀴즈, 진도 관리까지 모든 기능을 제공합니다.
           </p>
           <div className="flex gap-4 justify-center flex-col sm:flex-row">
-            <Link href="/flashcard">
-              <Button size="lg" className="text-lg px-8 py-3">
-                📚 지금 시작하기
-              </Button>
-            </Link>
-            <Link href="/quiz">
-              <Button variant="outline" size="lg" className="text-lg px-8 py-3">
-                🧠 퀴즈 풀어보기
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button size="lg" className="text-lg px-8 py-3">
+                    📊 대시보드로 이동
+                  </Button>
+                </Link>
+                <Link href="/flashcard">
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-3">
+                    📚 학습 계속하기
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button size="lg" className="text-lg px-8 py-3">
+                    📚 지금 시작하기
+                  </Button>
+                </Link>
+                <Link href="/quiz">
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-3">
+                    🧠 퀴즈 체험하기
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -110,11 +153,19 @@ export default function Home() {
           <p className="text-xl mb-8 opacity-90">
             무료로 고등학교 필수 어휘 3000개를 마스터하세요
           </p>
-          <Link href="/flashcard">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-3">
-              무료 학습 시작하기 →
-            </Button>
-          </Link>
+          {user ? (
+            <Link href="/dashboard">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-3">
+                대시보드로 이동 →
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/auth/login">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-3">
+                무료 학습 시작하기 →
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 

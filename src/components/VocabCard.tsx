@@ -8,13 +8,16 @@ interface VocabCardProps {
   showDefinition?: boolean
   onNext?: () => void
   onPrevious?: () => void
+  onFlip?: (isFlipped: boolean) => void
 }
 
-export function VocabCard({ word, showDefinition = false, onNext, onPrevious }: VocabCardProps) {
+export function VocabCard({ word, showDefinition = false, onNext, onPrevious, onFlip }: VocabCardProps) {
   const [isFlipped, setIsFlipped] = useState(showDefinition)
 
   const handleFlip = () => {
-    setIsFlipped(!isFlipped)
+    const newFlipped = !isFlipped
+    setIsFlipped(newFlipped)
+    onFlip?.(newFlipped)
   }
 
   return (
