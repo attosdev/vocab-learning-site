@@ -25,28 +25,80 @@ export function useAuth() {
           
           console.log('Extracted tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken })
           
-          if (accessToken && refreshToken) {
-            // URL에서 토큰을 가져와서 세션 설정
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            })
-            
-            console.log('SetSession result:', { success: !error, error: error?.message })
-            
-            if (!error && data.session) {
-              setUser(data.session.user)
-              await fetchProfile(data.session.user.id)
-              console.log('User set:', data.session.user.email)
+          if (accessToken) {
+            try {
+              // 토큰을 직접 디코딩해서 사용자 정보 추출
+              const payload = JSON.parse(atob(accessToken.split('.')[1]))
+              console.log('Token payload:', payload)
+              
+              // 사용자 객체 생성
+              const user = {
+                id: payload.sub,
+                email: payload.email,
+                user_metadata: payload.user_metadata || {},
+                app_metadata: payload.app_metadata || {},
+                aud: payload.aud,
+                role: payload.role,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+              
+              // localStorage에 토큰 저장
+              localStorage.setItem('supabase_access_token', accessToken)
+              if (refreshToken) {
+                localStorage.setItem('supabase_refresh_token', refreshToken)
+              }
+              
+              setUser(user as User)
+              await fetchProfile(user.id)
+              console.log('User set from token:', user.email)
               
               // URL 정리
               window.history.replaceState({}, document.title, window.location.pathname)
               setLoading(false)
               return
+            } catch (tokenError) {
+              console.error('Token decoding error:', tokenError)
             }
           }
         } catch (error) {
           console.error('Token processing error:', error)
+        }
+      }
+      
+      // localStorage에서 토큰 복원 시도
+      const savedToken = localStorage.getItem('supabase_access_token')
+      if (savedToken) {
+        try {
+          const payload = JSON.parse(atob(savedToken.split('.')[1]))
+          
+          // 토큰 만료 확인
+          if (payload.exp > Date.now() / 1000) {
+            const user = {
+              id: payload.sub,
+              email: payload.email,
+              user_metadata: payload.user_metadata || {},
+              app_metadata: payload.app_metadata || {},
+              aud: payload.aud,
+              role: payload.role,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+            
+            setUser(user as User)
+            await fetchProfile(user.id)
+            console.log('User restored from localStorage:', user.email)
+            setLoading(false)
+            return
+          } else {
+            // 만료된 토큰 제거
+            localStorage.removeItem('supabase_access_token')
+            localStorage.removeItem('supabase_refresh_token')
+          }
+        } catch (error) {
+          console.error('Token restoration error:', error)
+          localStorage.removeItem('supabase_access_token')
+          localStorage.removeItem('supabase_refresh_token')
         }
       }
       
@@ -118,10 +170,19 @@ export function useAuth() {
   }
 
   const signOut = async () => {
+    // localStorage 정리
+    localStorage.removeItem('supabase_access_token')
+    localStorage.removeItem('supabase_refresh_token')
+    
+    // Supabase 로그아웃
     const { error } = await supabase.auth.signOut()
     if (error) {
       console.error('Error signing out:', error)
     }
+    
+    // 상태 초기화
+    setUser(null)
+    setProfile(null)
   }
 
   return {
