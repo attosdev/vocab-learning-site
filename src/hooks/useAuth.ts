@@ -12,6 +12,14 @@ export function useAuth() {
   console.log('🔄 useAuth hook - current state:', { user: !!user, loading })
 
   useEffect(() => {
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') {
+      console.log('❌ Running on server, skipping auth check')
+      return
+    }
+    
+    console.log('✅ Running on client, starting auth check')
+    
     // URL에서 토큰 처리 (implicit flow)
     const handleAuthCallback = async () => {
       console.log('🔍 Auth callback started')
