@@ -4,83 +4,382 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================
+   🎨 VOCABMASTER 2025 DESIGN SYSTEM
+   Modern, Immersive, TikTok-Inspired
+   ================================ */
+
 @layer base {
   :root {
-    --background: 250 100% 99%;
-    --foreground: 222 84% 5%;
+    /* 🌟 Primary Brand Colors - Dynamic Gradients */
+    --background: 240 100% 99%;
+    --foreground: 222 84% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
+    --card-foreground: 222 84% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
+    --popover-foreground: 222 84% 8%;
+    
+    /* 🚀 Revolutionary Color Palette */
+    --primary: 270 100% 65%;        /* Electric Purple */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 195 100% 60%;      /* Electric Blue */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 330 100% 70%;         /* Hot Pink */
+    --accent-foreground: 0 0% 100%;
+    
+    /* 🎯 Gamification Colors */
+    --success: 142 76% 36%;         /* Emerald Green */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;          /* Golden Yellow */
+    --warning-foreground: 0 0% 100%;
+    --error: 0 84.2% 60.2%;         /* Vivid Red */
+    --error-foreground: 0 0% 100%;
+    
+    /* 🌈 Gradient System */
+    --gradient-primary: linear-gradient(135deg, hsl(270 100% 65%) 0%, hsl(195 100% 60%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(330 100% 70%) 0%, hsl(270 100% 65%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(120 100% 40%) 100%);
+    --gradient-gaming: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(25 95% 53%) 100%);
+    
+    /* 🔮 Glass Morphism */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    
+    /* 📱 TikTok-Style Variables */
+    --tiktok-bg: linear-gradient(45deg, #ff0050, #00f5ff);
+    --tiktok-shadow: 0 10px 40px rgba(255, 0, 80, 0.3);
+    --immersive-overlay: rgba(0, 0, 0, 0.7);
+    
+    /* 🎨 Surface Colors */
+    --muted: 210 40% 98%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
-    --radius: 1rem;
+    --input: 0 0% 100%;
+    --ring: 270 100% 65%;
+    --radius: 1.5rem;
+    
+    /* ⚡ Animation Variables */
+    --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --animation-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-fast: 150ms;
+    --animation-normal: 300ms;
+    --animation-slow: 500ms;
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 263.4 70% 50.4%;
+    /* 🌙 Dark Mode - Enhanced for OLED */
+    --background: 222 84% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 84% 6%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 6%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 270 100% 70%;
+    --secondary: 195 100% 65%;
+    --accent: 330 100% 75%;
+    
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    
+    /* 🌃 Dark Glass Morphism */
+    --glass-bg: rgba(0, 0, 0, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   }
 }
 
 @layer base {
   * {
     border-color: hsl(var(--border));
+    box-sizing: border-box;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
-    background-color: hsl(var(--background));
+    background: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
+/* ================================
+   🎮 COMPONENT UTILITIES & ANIMATIONS
+   ================================ */
+
+@layer components {
+  /* 🚀 TikTok-Style Immersive Components */
+  .immersive-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow);
+    transition: all var(--animation-normal) var(--animation-smooth);
+  }
+  
+  .immersive-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* 🌈 Gradient Button System */
+  .btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all var(--animation-normal) var(--animation-bounce);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--tiktok-shadow);
+  }
+  
+  .btn-gaming {
+    background: var(--gradient-gaming);
+    border: none;
+    color: white;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-gaming::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-gaming:hover::before {
+    left: 100%;
+  }
+  
+  /* 🎯 Gamification Elements */
+  .xp-bar {
+    background: linear-gradient(90deg, hsl(var(--success)) 0%, hsl(var(--warning)) 100%);
+    height: 8px;
+    border-radius: 999px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .xp-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: xp-shine 2s infinite;
+  }
+  
+  @keyframes xp-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  /* 🔥 Streak Fire Effect */
+  .streak-fire {
+    position: relative;
+    animation: fire-flicker 1.5s infinite alternate;
+  }
+  
+  @keyframes fire-flicker {
+    0% { transform: scale(1) rotate(-1deg); }
+    50% { transform: scale(1.05) rotate(1deg); }
+    100% { transform: scale(1.02) rotate(-0.5deg); }
+  }
+  
+  /* ⭐ Achievement Glow */
+  .achievement-glow {
+    animation: achievement-pulse 2s infinite;
+    filter: drop-shadow(0 0 20px hsl(var(--warning)));
+  }
+  
+  @keyframes achievement-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+}
+
+@layer utilities {
+  /* 📱 Mobile-First Responsive Classes */
+  .mobile-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .full-screen {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+  
+  /* 🎨 Gradient Text */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .text-gradient-gaming {
+    background: var(--gradient-gaming);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* 🌟 Neon Glow Effects */
+  .neon-glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+  
+  .neon-glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.5);
+  }
+  
+  /* 🎭 Advanced Animations */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s var(--animation-bounce);
+  }
+  
+  @keyframes slideUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-scale-bounce {
+    animation: scaleBounce 0.4s var(--animation-bounce);
+  }
+  
+  @keyframes scaleBounce {
+    0% { transform: scale(0.8); }
+    60% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+}
+
+/* ================================
+   🎴 ENHANCED 3D FLASHCARD SYSTEM
+   ================================ */
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotateY-180 {
+  transform: rotateY(180deg);
+}
+
+/* 🎴 Advanced Card Animations */
+.flashcard-3d {
+  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.flashcard-3d:hover {
+  transform: rotateY(5deg) rotateX(5deg) scale(1.02);
+}
+
+.flashcard-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius);
+}
+
+.flashcard-front {
+  background: linear-gradient(135deg, 
+    hsl(var(--primary)) 0%, 
+    hsl(var(--secondary)) 50%, 
+    hsl(var(--accent)) 100%);
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, 
+    hsl(var(--success)) 0%, 
+    hsl(var(--warning)) 100%);
+  transform: rotateY(180deg);
+}
+
+/* 🌊 Liquid Motion Effects */
+.liquid-morph {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: liquid-morph 8s ease-in-out infinite;
+}
+
+@keyframes liquid-morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 70% 30% 40% 60% / 30% 70% 60% 40%; }
+  75% { border-radius: 40% 70% 60% 30% / 70% 40% 50% 70%; }
+}
+
+/* ================================
+   📱 SIDEBAR ENHANCEMENTS
+   ================================ */
+
 :root {
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: var(--glass-bg);
+  --sidebar-foreground: hsl(var(--foreground));
+  --sidebar-primary: hsl(var(--primary));
+  --sidebar-primary-foreground: hsl(var(--primary-foreground));
+  --sidebar-accent: hsl(var(--accent) / 0.1);
+  --sidebar-accent-foreground: hsl(var(--accent));
+  --sidebar-border: var(--glass-border);
+  --sidebar-ring: hsl(var(--ring));
 }
 
 .dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: var(--glass-bg);
+  --sidebar-foreground: hsl(var(--foreground));
+  --sidebar-primary: hsl(var(--primary));
+  --sidebar-primary-foreground: hsl(var(--primary-foreground));
+  --sidebar-accent: hsl(var(--accent) / 0.1);
+  --sidebar-accent-foreground: hsl(var(--accent));
+  --sidebar-border: var(--glass-border);
+  --sidebar-ring: hsl(var(--ring));
 }
 
 @theme inline {
@@ -94,30 +393,303 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-    outline-color: hsl(var(--ring) / 0.5);
+/* ================================
+   🎮 ADVANCED GAMIFICATION EFFECTS
+   ================================ */
+
+@layer components {
+  /* 🏆 Achievement Notification */
+  .achievement-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    animation: achievement-slide-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+  
+  @keyframes achievement-slide-in {
+    0% {
+      transform: translateX(400px) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+  
+  /* 🎯 Combo Multiplier */
+  .combo-multiplier {
+    animation: combo-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    filter: drop-shadow(0 0 10px hsl(var(--warning)));
+  }
+  
+  @keyframes combo-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(5deg); }
+    100% { transform: scale(1); }
+  }
+  
+  /* ⚡ Power-Up Effect */
+  .power-up {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .power-up::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(transparent, rgba(255, 215, 0, 0.3), transparent);
+    animation: power-up-rotation 2s linear infinite;
+  }
+  
+  @keyframes power-up-rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* 🌟 Level Up Animation */
+  .level-up {
+    animation: level-up-celebration 1s ease-out;
+  }
+  
+  @keyframes level-up-celebration {
+    0% { 
+      transform: scale(1) rotate(0deg); 
+      filter: brightness(1) saturate(1);
+    }
+    25% { 
+      transform: scale(1.2) rotate(-5deg); 
+      filter: brightness(1.5) saturate(1.5);
+    }
+    50% { 
+      transform: scale(1.3) rotate(5deg); 
+      filter: brightness(2) saturate(2);
+    }
+    75% { 
+      transform: scale(1.1) rotate(-2deg); 
+      filter: brightness(1.3) saturate(1.3);
+    }
+    100% { 
+      transform: scale(1) rotate(0deg); 
+      filter: brightness(1) saturate(1);
+    }
+  }
+  
+  /* 🔥 Damage/Success Text */
+  .floating-text {
+    position: absolute;
+    pointer-events: none;
+    font-weight: 900;
+    font-size: 2rem;
+    animation: floating-text-rise 2s ease-out forwards;
+  }
+  
+  @keyframes floating-text-rise {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(0.8);
+    }
+    20% {
+      opacity: 1;
+      transform: translateY(-20px) scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-100px) scale(1);
+    }
+  }
+  
+  /* 💫 Particle Burst */
+  .particle-burst {
+    position: relative;
+  }
+  
+  .particle-burst::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #fff, #f0f);
+    border-radius: 50%;
+    animation: particle-burst-effect 1s ease-out;
+  }
+  
+  @keyframes particle-burst-effect {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(20);
+      opacity: 0;
+    }
+  }
+  
+  /* 🎪 Confetti Effect */
+  .confetti {
+    position: fixed;
+    top: -10px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+  }
+  
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+    animation: confetti-fall 3s ease-in-out infinite;
+  }
+  
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-100vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
   }
 }
 
-/* 3D 플립 애니메이션을 위한 CSS */
-.perspective-1000 {
-  perspective: 1000px;
-}
+/* ================================
+   🎨 REACTIVE UI ENHANCEMENTS
+   ================================ */
 
-.preserve-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
-.rotateY-180 {
-  transform: rotateY(180deg);
+@layer utilities {
+  /* 📱 Mobile Gestures */
+  .swipe-indicator {
+    position: relative;
+  }
+  
+  .swipe-indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -20px;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
+    animation: swipe-hint 2s ease-in-out infinite;
+  }
+  
+  @keyframes swipe-hint {
+    0%, 100% { opacity: 0; transform: translateX(-10px); }
+    50% { opacity: 1; transform: translateX(10px); }
+  }
+  
+  /* 🎯 Focus States */
+  .focus-ring {
+    transition: all 0.2s ease;
+  }
+  
+  .focus-ring:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.3);
+  }
+  
+  /* ⚡ Button Variants */
+  .btn-gaming-alt {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+    transform: perspective(1000px);
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+  
+  .btn-gaming-alt:hover {
+    transform: perspective(1000px) rotateX(5deg) translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .btn-gaming-alt:active {
+    transform: perspective(1000px) rotateX(-2deg) translateY(1px);
+  }
+  
+  /* 🌊 Liquid Button */
+  .btn-liquid {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    border: none;
+    color: white;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50px;
+  }
+  
+  .btn-liquid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .btn-liquid:hover::before {
+    left: 100%;
+  }
+  
+  /* 🎭 Holographic Text */
+  .text-holographic {
+    background: linear-gradient(
+      45deg,
+      #ff6b6b 0%,
+      #4ecdc4 25%,
+      #45b7d1 50%,
+      #96ceb4 75%,
+      #ffeaa7 100%
+    );
+    background-size: 400% 400%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: holographic-shift 3s ease-in-out infinite;
+  }
+  
+  @keyframes holographic-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* 🔮 Crystal Effect */
+  .crystal-effect {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .crystal-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    pointer-events: none;
+  }
 }
