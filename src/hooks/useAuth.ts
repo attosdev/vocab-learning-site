@@ -203,6 +203,13 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, !!session)
+        
+        // INITIAL_SESSION 이벤트는 무시 (localStorage에서 이미 복원했으므로)
+        if (event === 'INITIAL_SESSION' && !session) {
+          console.log('Ignoring INITIAL_SESSION with no session')
+          return
+        }
+        
         setUser(session?.user ?? null)
         
         if (session?.user) {
