@@ -70,6 +70,25 @@ export function useAuth() {
               }
               
               setUser(user as User)
+              
+              // Supabase 클라이언트에 세션 설정 시도
+              try {
+                const session = {
+                  access_token: accessToken,
+                  refresh_token: refreshToken || '',
+                  expires_in: 3600,
+                  expires_at: payload.exp,
+                  token_type: 'bearer',
+                  user: user
+                }
+                
+                // 세션 수동 설정
+                await supabase.auth.setSession(session as any)
+                console.log('✅ Session set manually')
+              } catch (sessionError) {
+                console.log('Manual session setting failed, continuing with direct API calls')
+              }
+              
               await fetchProfile(user.id)
               console.log('✅ User set from token:', user.email)
               console.log('User object:', user)
@@ -156,18 +175,41 @@ export function useAuth() {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        console.error('Error fetching profile:', error)
+      // localStorage에서 토큰 가져오기
+      const accessToken = localStorage.getItem('supabase_access_token')
+      
+      if (!accessToken) {
+        console.log('No access token found for profile fetch')
         return
       }
-
-      setProfile(data)
+      
+      console.log('🔍 Fetching profile with token...')
+      
+      // 직접 API 호출
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/user_profiles?select=*&id=eq.${userId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      if (!response.ok) {
+        console.error('Profile fetch failed:', response.status, response.statusText)
+        return
+      }
+      
+      const data = await response.json()
+      console.log('✅ Profile fetched:', data)
+      
+      if (data && data.length > 0) {
+        setProfile(data[0])
+      } else {
+        console.log('Profile not found, will be created by trigger')
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
     }
