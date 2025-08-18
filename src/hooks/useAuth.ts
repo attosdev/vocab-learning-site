@@ -138,9 +138,13 @@ export function useAuth() {
             }
             
             setUser(user as User)
-            await fetchProfile(user.id)
             console.log('✅ User restored from localStorage:', user.email)
+            console.log('👤 User object set:', user)
+            
+            await fetchProfile(user.id)
+            
             setLoading(false)
+            console.log('✅ Loading set to false, user should be visible now')
             return
           } else {
             console.log('❌ Token expired, removing...')
@@ -214,6 +218,7 @@ export function useAuth() {
       
       if (!response.ok) {
         console.error('Profile fetch failed:', response.status, response.statusText)
+        console.log('⚠️ Profile fetch failed, but user login will continue')
         return
       }
       
