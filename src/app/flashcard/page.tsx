@@ -174,49 +174,57 @@ export default function FlashcardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4 md:p-6">
-      {/* 헤더 */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-6">
+      {/* 상단 헤더 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-8"
       >
-        <div className="flex items-center justify-between">
+        {/* 제목과 상태 */}
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">플래시카드 복습</h1>
-            <p className="text-gray-600">카드를 클릭해서 뜻을 확인하세요</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              플래시카드 복습
+            </h1>
+            <p className="text-gray-600 mt-1">카드를 탭해서 뜻을 확인하세요</p>
           </div>
           
-          {/* 상태 표시 */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Timer className="h-5 w-5 text-blue-500" />
-              <span className="font-bold text-blue-600">{formatTime(timeElapsed)}</span>
+          {/* 실시간 통계 */}
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-white/70 backdrop-blur-sm rounded-full shadow-sm">
+              <Timer className="h-4 w-4 text-blue-500" />
+              <span className="font-semibold text-blue-600 text-sm">{formatTime(timeElapsed)}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-orange-500" />
-              <span className="font-bold text-orange-600">{streak}</span>
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-white/70 backdrop-blur-sm rounded-full shadow-sm">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <span className="font-semibold text-orange-600 text-sm">{streak}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-purple-500" />
-              <span className="font-bold text-purple-600">{sessionXP} XP</span>
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-white/70 backdrop-blur-sm rounded-full shadow-sm">
+              <Zap className="h-4 w-4 text-purple-500" />
+              <span className="font-semibold text-purple-600 text-sm">{sessionXP} XP</span>
             </div>
           </div>
         </div>
 
-        {/* 진행률 */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{currentIndex + 1} / {totalWords}</span>
-            <span>{Math.round(progress)}% 완료</span>
+        {/* 진행률 카드 */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-700">학습 진도</span>
+            <span className="text-sm font-bold text-indigo-600">{currentIndex + 1} / {totalWords}</span>
           </div>
-          <Progress value={progress} className="mt-2 h-3" />
+          <Progress value={progress} className="h-3 bg-gray-100" />
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs text-gray-500">시작</span>
+            <span className="text-sm font-semibold text-indigo-600">{Math.round(progress)}% 완료</span>
+            <span className="text-xs text-gray-500">완료</span>
+          </div>
         </div>
       </motion.div>
 
       {/* 메인 플래시카드 */}
       <div className="mx-auto max-w-2xl">
-        <motion.div className="relative perspective-1000 mb-6">
+        <motion.div className="relative perspective-1000 mb-8">
           <motion.div
             key={currentIndex}
             initial={{ rotateY: -90, opacity: 0 }}
@@ -225,30 +233,38 @@ export default function FlashcardPage() {
             className="preserve-3d"
           >
             <Card 
-              className="border-0 shadow-2xl cursor-pointer min-h-[400px] relative"
+              className="border-0 shadow-2xl cursor-pointer min-h-[450px] relative overflow-hidden bg-gradient-to-br from-white to-gray-50"
               onClick={handleFlip}
             >
+              {/* 카드 장식 요소 */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full opacity-30" />
+              <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-gradient-to-br from-pink-100 to-orange-100 rounded-full opacity-40" />
+              
               <motion.div
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 transition={{ duration: 0.6 }}
-                className="preserve-3d w-full h-full"
+                className="preserve-3d w-full h-full relative z-10"
               >
                 {/* 앞면 - 단어 */}
                 <div className={cn(
                   "absolute inset-0 backface-hidden",
                   isFlipped && "invisible"
                 )}>
-                  <CardContent className="flex flex-col items-center justify-center h-[400px] p-8">
-                    <Badge className={cn("mb-4", difficultyColors[currentWord.difficulty as keyof typeof difficultyColors])}>
-                      {currentWord.difficulty === 'basic' ? '기초' : 
-                       currentWord.difficulty === 'intermediate' ? '중급' : '고급'}
+                  <CardContent className="flex flex-col items-center justify-center h-[450px] p-8 relative">
+                    <Badge className={cn("mb-6 text-sm px-4 py-2", difficultyColors[currentWord.difficulty as keyof typeof difficultyColors])}>
+                      {currentWord.difficulty === 'basic' ? '🟢 기초' : 
+                       currentWord.difficulty === 'intermediate' ? '🟡 중급' : '🔴 고급'}
                     </Badge>
                     
-                    <h2 className="text-5xl font-bold text-gray-900 mb-4 text-center">
+                    <motion.h2 
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      className="text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 text-center"
+                    >
                       {currentWord.word}
-                    </h2>
+                    </motion.h2>
                     
-                    <p className="text-xl text-gray-600 mb-6">
+                    <p className="text-xl text-gray-600 mb-8 font-mono">
                       {currentWord.pronunciation}
                     </p>
                     
@@ -258,13 +274,19 @@ export default function FlashcardPage() {
                         e.stopPropagation()
                         playPronunciation()
                       }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-600 transition-colors px-6 py-3 rounded-full"
                     >
                       <Volume2 className="h-5 w-5" />
-                      발음 듣기
+                      🔊 발음 듣기
                     </Button>
                     
-                    <p className="text-sm text-gray-500 mt-8">카드를 클릭하여 뜻 보기</p>
+                    <motion.p 
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-sm text-gray-400 mt-8 bg-gray-50 px-4 py-2 rounded-full"
+                    >
+                      💡 카드를 탭해서 뜻을 확인하세요
+                    </motion.p>
                   </CardContent>
                 </div>
 
@@ -273,24 +295,38 @@ export default function FlashcardPage() {
                   "absolute inset-0 backface-hidden rotateY-180",
                   !isFlipped && "invisible"
                 )}>
-                  <CardContent className="flex flex-col justify-center h-[400px] p-8">
-                    <div className="text-center mb-6">
-                      <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                  <CardContent className="flex flex-col justify-center h-[450px] p-8 relative">
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-center mb-8"
+                    >
+                      <h3 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
                         {currentWord.meaning}
                       </h3>
-                    </div>
+                      <div className="w-16 h-1 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full mx-auto"></div>
+                    </motion.div>
                     
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-                      <h4 className="font-semibold text-gray-700 mb-3">예문</h4>
-                      <p className="text-gray-900 mb-3 italic text-lg">
+                    <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 border-l-4 border-indigo-400">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">💬</span>
+                        <h4 className="font-semibold text-gray-700">예문</h4>
+                      </div>
+                      <p className="text-gray-900 mb-4 italic text-lg leading-relaxed">
                         &ldquo;{currentWord.example}&rdquo;
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-base">
                         {currentWord.exampleTranslation}
                       </p>
                     </div>
                     
-                    <p className="text-sm text-gray-500 mt-6 text-center">카드를 클릭하여 단어 보기</p>
+                    <motion.p 
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-sm text-gray-400 mt-6 text-center bg-gray-50 px-4 py-2 rounded-full mx-auto"
+                    >
+                      🔄 다시 탭해서 단어 보기
+                    </motion.p>
                   </CardContent>
                 </div>
               </motion.div>
@@ -305,22 +341,22 @@ export default function FlashcardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="flex gap-4 mb-6"
+              className="flex gap-4 mb-8"
             >
               <Button
                 onClick={handleDontKnow}
                 variant="outline"
-                className="flex-1 h-14 text-red-600 border-red-200 hover:bg-red-50"
+                className="flex-1 h-16 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:scale-105 transition-all duration-200 rounded-2xl font-semibold text-lg shadow-lg"
               >
-                <XCircle className="h-5 w-5 mr-2" />
-                모르겠어요
+                <XCircle className="h-6 w-6 mr-3" />
+                ❌ 모르겠어요
               </Button>
               <Button
                 onClick={handleKnow}
-                className="flex-1 h-14 bg-green-600 hover:bg-green-700"
+                className="flex-1 h-16 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:scale-105 transition-all duration-200 rounded-2xl font-semibold text-lg shadow-lg text-white"
               >
-                <CheckCircle className="h-5 w-5 mr-2" />
-                알고 있어요
+                <CheckCircle className="h-6 w-6 mr-3" />
+                ✅ 알고 있어요
               </Button>
             </motion.div>
           )}
@@ -331,65 +367,78 @@ export default function FlashcardPage() {
           <Button
             variant="outline"
             onClick={handlePrevious}
-            className="h-12 px-6"
+            className="h-14 px-8 rounded-2xl border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
+            <ChevronLeft className="h-5 w-5 mr-2" />
             이전
           </Button>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setIsFlipped(false)}
-              className="h-12 px-4"
+              className="h-14 px-6 rounded-2xl border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200"
+              title="카드 뒤집기 초기화"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-5 w-5" />
             </Button>
             <Button
               variant="outline"
               onClick={shuffleCards}
-              className="h-12 px-4"
+              className="h-14 px-6 rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 transition-all duration-200"
+              title="랜덤 카드"
             >
-              <Shuffle className="h-4 w-4" />
+              <Shuffle className="h-5 w-5" />
             </Button>
           </div>
 
           <Button
             variant="outline"
             onClick={handleNext}
-            className="h-12 px-6"
+            className="h-14 px-8 rounded-2xl border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium"
           >
             다음
-            <ChevronRight className="h-4 w-4 ml-2" />
+            <ChevronRight className="h-5 w-5 ml-2" />
           </Button>
         </div>
 
         {/* 통계 카드 */}
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-4 text-center">
-              <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{studiedWords.size}</p>
-              <p className="text-xs text-muted-foreground">학습 완료</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-3 gap-4 mt-10"
+        >
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-3xl font-bold text-blue-700 mb-1">{studiedWords.size}</p>
+              <p className="text-sm text-blue-600 font-medium">📚 학습 완료</p>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-4 text-center">
-              <Star className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{correctWords.size}</p>
-              <p className="text-xs text-muted-foreground">정답</p>
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Star className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-3xl font-bold text-green-700 mb-1">{correctWords.size}</p>
+              <p className="text-sm text-green-600 font-medium">⭐ 정답</p>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-4 text-center">
-              <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{sessionXP}</p>
-              <p className="text-xs text-muted-foreground">획득 XP</p>
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-yellow-50 to-orange-50 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-3xl font-bold text-yellow-700 mb-1">{sessionXP}</p>
+              <p className="text-sm text-yellow-600 font-medium">⚡ 획득 XP</p>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
