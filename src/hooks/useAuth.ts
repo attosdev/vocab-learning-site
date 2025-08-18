@@ -8,6 +8,8 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  console.log('🔄 useAuth hook - current state:', { user: !!user, loading })
 
   useEffect(() => {
     // URL에서 토큰 처리 (implicit flow)
@@ -137,9 +139,15 @@ export function useAuth() {
               updated_at: new Date().toISOString()
             }
             
+            console.log('🔸 About to setUser with:', user)
             setUser(user as User)
             console.log('✅ User restored from localStorage:', user.email)
             console.log('👤 User object set:', user)
+            
+            // 강제로 상태 확인
+            setTimeout(() => {
+              console.log('🔸 After 100ms - checking if state updated')
+            }, 100)
             
             await fetchProfile(user.id)
             
@@ -161,14 +169,17 @@ export function useAuth() {
         console.log('🔄 No saved token found')
       }
       
-      // 일반 세션 확인
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('Regular session check:', !!session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+      // 일반 세션 확인 (토큰이 없을 때만)
+      if (!savedToken) {
+        const { data: { session } } = await supabase.auth.getSession()
+        console.log('Regular session check:', !!session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id)
+        }
       }
+      
       setLoading(false)
     }
 
