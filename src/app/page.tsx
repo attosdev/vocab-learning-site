@@ -5,16 +5,12 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
 import {
   BookOpen,
   Brain,
   Trophy,
   Target,
   Flame,
-  TrendingUp,
   Zap,
   ChevronRight,
 } from 'lucide-react'
@@ -27,7 +23,9 @@ function LoginPage() {
     <div className="relative min-h-screen overflow-hidden full-screen">
       {/* 🌊 동적 배경 시스템 */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-pink-900">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="#9C92AC" fill-opacity="0.1"><circle cx="30" cy="30" r="4"/></g></g></svg>')}")`,
+        }}></div>
         
         {/* 🎨 플로팅 요소들 */}
         <div className="absolute -left-10 top-1/4 w-80 h-80 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-float"></div>
@@ -216,7 +214,9 @@ function DashboardHome() {
     <div className="min-h-screen full-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* 🌌 배경 효과 */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 10 0 L 0 0 0 10" fill="none" stroke="%234F46E5" stroke-width="0.5" opacity="0.1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100" height="100" fill="url(%23smallGrid)"/%3E%3C/svg%3E')] opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(236, 72, 153, 0.1) 0%, transparent 50%)`,
+        }}></div>
         
         {/* 플로팅 파티클 */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float"></div>

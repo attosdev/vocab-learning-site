@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/hooks/useAuth'
 import { useLearningProgress } from '@/hooks/useLearningProgress'
@@ -14,7 +12,6 @@ import {
   ChevronRight,
   RotateCcw,
   Shuffle,
-  Trophy,
   Target,
   Flame,
   CheckCircle,
@@ -74,11 +71,6 @@ const mockWords = [
   }
 ]
 
-const difficultyColors = {
-  basic: "bg-green-100 text-green-800",
-  intermediate: "bg-yellow-100 text-yellow-800",
-  advanced: "bg-red-100 text-red-800"
-}
 
 // 🚀 TikTok 스타일 몰입형 플래시카드 경험
 export default function FlashcardPage() {
@@ -93,10 +85,6 @@ export default function FlashcardPage() {
   const [sessionXP, setSessionXP] = useState(0)
   const [streak, setStreak] = useState(0)
   const [timeElapsed, setTimeElapsed] = useState(0)
-  const [comboCount, setComboCount] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const [showCelebration, setShowCelebration] = useState(false)
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null)
 
   const currentWord = mockWords[currentIndex]
   const totalWords = mockWords.length
@@ -193,7 +181,10 @@ export default function FlashcardPage() {
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-float" style={{animationDelay: '-2s'}}></div>
         
         {/* 네온 그리드 */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="m 60 0 l 0 60 l -60 0 Z" fill="none" stroke="%238B5CF6" stroke-width="0.5" stroke-opacity="0.1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="60" height="60" fill="url(%23grid)"/%3E%3C/svg%3E')] opacity-20"></div>
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px'
+        }}></div>
       </div>
 
       <div className="relative z-10 p-4 md:p-6">
@@ -437,7 +428,7 @@ export default function FlashcardPage() {
                         </div>
                         
                         <blockquote className="text-white text-xl font-medium italic mb-6 leading-relaxed border-l-4 border-purple-400 pl-6">
-                          "{currentWord.example}"
+                          &ldquo;{currentWord.example}&rdquo;
                         </blockquote>
                         
                         <p className="text-white/80 text-lg font-medium">
@@ -713,7 +704,6 @@ export default function FlashcardPage() {
             </div>
           </motion.div>
         </div>
-      </div>
       </div>
     </div>
   )

@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import {
   Home,
   BookOpen,
@@ -165,7 +164,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-4">
             <SidebarMenu className="space-y-2">
-              {menuItems.map((item, index) => (
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
