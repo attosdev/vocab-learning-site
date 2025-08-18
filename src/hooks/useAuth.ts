@@ -115,12 +115,17 @@ export function useAuth() {
       
       // localStorage에서 토큰 복원 시도
       const savedToken = localStorage.getItem('supabase_access_token')
+      console.log('🔄 Checking saved token:', !!savedToken)
+      
       if (savedToken) {
         try {
           const payload = JSON.parse(atob(savedToken.split('.')[1]))
+          console.log('🔄 Saved token payload:', payload)
           
           // 토큰 만료 확인
           if (payload.exp > Date.now() / 1000) {
+            console.log('🔄 Token is valid, restoring user...')
+            
             const user = {
               id: payload.sub,
               email: payload.email,
@@ -134,19 +139,22 @@ export function useAuth() {
             
             setUser(user as User)
             await fetchProfile(user.id)
-            console.log('User restored from localStorage:', user.email)
+            console.log('✅ User restored from localStorage:', user.email)
             setLoading(false)
             return
           } else {
+            console.log('❌ Token expired, removing...')
             // 만료된 토큰 제거
             localStorage.removeItem('supabase_access_token')
             localStorage.removeItem('supabase_refresh_token')
           }
         } catch (error) {
-          console.error('Token restoration error:', error)
+          console.error('❌ Token restoration error:', error)
           localStorage.removeItem('supabase_access_token')
           localStorage.removeItem('supabase_refresh_token')
         }
+      } else {
+        console.log('🔄 No saved token found')
       }
       
       // 일반 세션 확인
