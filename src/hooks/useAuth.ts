@@ -60,10 +60,16 @@ export function useAuth() {
   }
 
   const signInWithGoogle = async () => {
+    // 운영 환경 확인
+    const isProduction = window.location.hostname !== 'localhost'
+    const redirectTo = isProduction 
+      ? 'https://attosvoca.vercel.app/auth/callback'
+      : `${window.location.origin}/auth/callback`
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: redirectTo
       }
     })
     
