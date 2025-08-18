@@ -12,10 +12,25 @@ export function useAuth() {
   useEffect(() => {
     // URL에서 토큰 처리 (implicit flow)
     const handleAuthCallback = async () => {
+      console.log('🔍 Auth callback started')
       console.log('Current URL:', window.location.href)
       console.log('Hash:', window.location.hash)
+      console.log('Search params:', window.location.search)
+      
+      // URL 쿼리 파라미터에서도 토큰 확인
+      const urlParams = new URLSearchParams(window.location.search)
+      const codeParam = urlParams.get('code')
+      const errorParam = urlParams.get('error')
+      
+      console.log('🔍 URL params:', { code: !!codeParam, error: errorParam })
       
       const hash = window.location.hash
+      console.log('🔍 Hash analysis:', { 
+        hasHash: !!hash, 
+        hasAccessToken: hash.includes('access_token'),
+        hashLength: hash.length 
+      })
+      
       if (hash && hash.includes('access_token')) {
         try {
           // 해시에서 토큰 정보 추출
@@ -23,13 +38,18 @@ export function useAuth() {
           const accessToken = hashParams.get('access_token')
           const refreshToken = hashParams.get('refresh_token')
           
-          console.log('Extracted tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken })
+          console.log('🔑 Extracted tokens:', { 
+            accessToken: !!accessToken, 
+            refreshToken: !!refreshToken,
+            accessTokenLength: accessToken?.length,
+            fullHash: hash 
+          })
           
           if (accessToken) {
             try {
               // 토큰을 직접 디코딩해서 사용자 정보 추출
               const payload = JSON.parse(atob(accessToken.split('.')[1]))
-              console.log('Token payload:', payload)
+              console.log('🎯 Token payload:', payload)
               
               // 사용자 객체 생성
               const user = {
@@ -51,7 +71,8 @@ export function useAuth() {
               
               setUser(user as User)
               await fetchProfile(user.id)
-              console.log('User set from token:', user.email)
+              console.log('✅ User set from token:', user.email)
+              console.log('User object:', user)
               
               // URL 정리
               window.history.replaceState({}, document.title, window.location.pathname)
