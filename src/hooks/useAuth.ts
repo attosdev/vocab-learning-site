@@ -73,19 +73,19 @@ export function useAuth() {
               
               // Supabase 클라이언트에 세션 설정 시도
               try {
-                const session = {
+                const sessionData = {
                   access_token: accessToken,
                   refresh_token: refreshToken || '',
                   expires_in: 3600,
                   expires_at: payload.exp,
-                  token_type: 'bearer',
-                  user: user
+                  token_type: 'bearer' as const,
+                  user: user as User
                 }
                 
                 // 세션 수동 설정
-                await supabase.auth.setSession(session as { access_token: string; refresh_token: string; expires_in: number; expires_at: number; token_type: string; user: unknown })
+                await supabase.auth.setSession(sessionData)
                 console.log('✅ Session set manually')
-              } catch (sessionError) {
+              } catch (error) {
                 console.log('Manual session setting failed, continuing with direct API calls')
               }
               
