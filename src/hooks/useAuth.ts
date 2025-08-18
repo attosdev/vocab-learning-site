@@ -9,7 +9,8 @@ export function useAuth() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   
-  console.log('🔄 useAuth hook - current state:', { user: !!user, loading })
+  // 디버그용 로그 (나중에 제거 가능)
+  // console.log('🔄 useAuth hook - current state:', { user: !!user, loading })
 
   useEffect(() => {
     // 클라이언트 사이드에서만 실행
@@ -106,13 +107,6 @@ export function useAuth() {
               await fetchProfile(user.id)
               console.log('✅ User set from token:', user.email)
               console.log('User object:', user)
-              
-              // 성공 표시를 위한 임시 알림
-              setTimeout(() => {
-                if (window.confirm(`로그인 성공! ${user.email}로 로그인되었습니다. 확인을 누르면 페이지가 새로고침됩니다.`)) {
-                  window.location.reload()
-                }
-              }, 1000)
               
               // URL 정리
               window.history.replaceState({}, document.title, window.location.pathname)

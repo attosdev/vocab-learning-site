@@ -7,14 +7,6 @@ import { useAuth } from '@/hooks/useAuth'
 
 export default function Home() {
   const { user, profile, loading, signOut } = useAuth()
-  
-  // 디버깅용 상태 확인
-  console.log('🎯 Home component render:', { 
-    hasUser: !!user, 
-    userEmail: user?.email, 
-    loading,
-    profileLoaded: !!profile 
-  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -31,11 +23,6 @@ export default function Home() {
             <Link href="/quiz" className="text-sm font-medium hover:text-primary transition-colors">퀴즈</Link>
           </nav>
           <div className="flex items-center gap-2">
-            {/* 디버깅 정보 표시 */}
-            <div className="text-xs bg-yellow-100 px-2 py-1 rounded mr-2">
-              Debug: {loading ? 'Loading...' : user ? `Logged: ${user.email}` : 'Not logged'}
-            </div>
-            
             {loading ? (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
             ) : user ? (
