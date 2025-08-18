@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { supabase, LearningProgress, VocabularyWord } from '@/lib/supabase'
+import { useEffect, useState, useCallback } from 'react'
+import { supabase, LearningProgress } from '@/lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useLearningProgress() {
@@ -9,16 +9,7 @@ export function useLearningProgress() {
   const [progress, setProgress] = useState<LearningProgress[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) {
-      fetchProgress()
-    } else {
-      setProgress([])
-      setLoading(false)
-    }
-  }, [user])
-
-  const fetchProgress = async () => {
+  const fetchProgress = useCallback(async () => {
     if (!user) return
 
     try {
@@ -39,7 +30,16 @@ export function useLearningProgress() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchProgress()
+    } else {
+      setProgress([])
+      setLoading(false)
+    }
+  }, [user, fetchProgress])
 
   const updateProgress = async (wordId: number, isCorrect: boolean) => {
     if (!user) return

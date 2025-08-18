@@ -100,8 +100,8 @@ export function useAuth() {
                 // 세션 수동 설정
                 await supabase.auth.setSession(sessionData)
                 console.log('✅ Session set manually')
-              } catch (error) {
-                console.log('Manual session setting failed, continuing with direct API calls')
+              } catch (err) {
+                console.log('Manual session setting failed, continuing with direct API calls:', err)
               }
               
               await fetchProfile(user.id)

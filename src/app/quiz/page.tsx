@@ -1,85 +1,157 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { vocabData } from '@/data/vocab-data'
-import { VocabWord } from '@/types/vocab'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/hooks/useAuth'
 import { useLearningProgress } from '@/hooks/useLearningProgress'
-import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
+import {
+  Brain,
+  Trophy,
+  Timer,
+  Zap,
+  Target,
+  Flame,
+  Star,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  BookOpen,
+  Volume2,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+// Mock data
+const mockWords = [
+  {
+    id: 1,
+    word: "abundant",
+    pronunciation: "/əˈbʌndənt/",
+    meaning: "풍부한, 많은",
+    difficulty: "intermediate"
+  },
+  {
+    id: 2,
+    word: "reluctant",
+    pronunciation: "/rɪˈlʌktənt/",
+    meaning: "꺼리는, 마지못한",
+    difficulty: "intermediate"
+  },
+  {
+    id: 3,
+    word: "demonstrate",
+    pronunciation: "/ˈdemənstreɪt/",
+    meaning: "보여주다, 실증하다",
+    difficulty: "basic"
+  },
+  {
+    id: 4,
+    word: "magnificent",
+    pronunciation: "/mæɡˈnɪfɪsənt/",
+    meaning: "장엄한, 웅장한",
+    difficulty: "advanced"
+  },
+  {
+    id: 5,
+    word: "persistent",
+    pronunciation: "/pərˈsɪstənt/",
+    meaning: "지속적인, 끈질긴",
+    difficulty: "advanced"
+  }
+]
 
 interface QuizQuestion {
-  word: VocabWord
+  id: number
+  word: string
+  pronunciation: string
   options: string[]
   correctAnswer: string
+  difficulty: string
+}
+
+const difficultyColors = {
+  basic: "bg-green-100 text-green-800",
+  intermediate: "bg-yellow-100 text-yellow-800",
+  advanced: "bg-red-100 text-red-800"
 }
 
 export default function QuizPage() {
-  const { user, profile, loading: authLoading, signOut } = useAuth()
+  const { user } = useAuth()
   const { updateProgress } = useLearningProgress()
+  
+  const [gameState, setGameState] = useState<'ready' | 'playing' | 'finished'>('ready')
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [selectedAnswer, setSelectedAnswer] = useState<string>('')
-  const [showResult, setShowResult] = useState(false)
   const [score, setScore] = useState(0)
-  const [answers, setAnswers] = useState<{ correct: boolean; selected: string; correct_answer: string }[]>([])
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [startTime, setStartTime] = useState<Date>(new Date())
+  const [timeElapsed, setTimeElapsed] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [bestStreak, setBestStreak] = useState(0)
+  const [sessionXP, setSessionXP] = useState(0)
+  const [answers, setAnswers] = useState<{correct: boolean, selected: string, correctAnswer: string}[]>([])
 
-  // Generate quiz questions and start session
   useEffect(() => {
-    const generateQuestions = async () => {
-      const shuffled = [...vocabData].sort(() => Math.random() - 0.5)
-      const selectedWords = shuffled.slice(0, 10)
-      
-      const quizQuestions: QuizQuestion[] = selectedWords.map(word => {
-        const incorrectOptions = vocabData
-          .filter(w => w.id !== word.id)
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 3)
-          .map(w => w.definition)
-        
-        const options = [word.definition, ...incorrectOptions].sort(() => Math.random() - 0.5)
-        
-        return {
-          word,
-          options,
-          correctAnswer: word.definition
-        }
-      })
-      
-      setQuestions(quizQuestions)
-      setStartTime(new Date())
-
-      // 로그인한 사용자만 세션 저장
-      if (user) {
-        try {
-          const { data, error } = await supabase
-            .from('quiz_sessions')
-            .insert({
-              user_id: user.id,
-              quiz_type: 'multiple-choice',
-              total_questions: quizQuestions.length,
-              started_at: new Date().toISOString()
-            })
-            .select()
-            .single()
-
-          if (error) {
-            console.error('Error creating quiz session:', error)
-          } else {
-            setSessionId(data.id)
-          }
-        } catch (error) {
-          console.error('Error creating quiz session:', error)
-        }
-      }
+    let timer: NodeJS.Timeout
+    if (gameState === 'playing') {
+      timer = setInterval(() => {
+        setTimeElapsed(prev => prev + 1)
+      }, 1000)
     }
+    return () => clearInterval(timer)
+  }, [gameState])
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const generateQuestions = () => {
+    const shuffled = [...mockWords].sort(() => Math.random() - 0.5)
+    const quizQuestions: QuizQuestion[] = shuffled.map(word => {
+      const incorrectOptions = mockWords
+        .filter(w => w.id !== word.id)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map(w => w.meaning)
+      
+      const options = [word.meaning, ...incorrectOptions].sort(() => Math.random() - 0.5)
+      
+      return {
+        id: word.id,
+        word: word.word,
+        pronunciation: word.pronunciation,
+        options,
+        correctAnswer: word.meaning,
+        difficulty: word.difficulty
+      }
+    })
     
+    setQuestions(quizQuestions)
+  }
+
+  const startQuiz = () => {
     generateQuestions()
-  }, [user])
+    setGameState('playing')
+    setCurrentQuestion(0)
+    setScore(0)
+    setTimeElapsed(0)
+    setStreak(0)
+    setSessionXP(0)
+    setAnswers([])
+    setSelectedAnswer('')
+  }
+
+  const playPronunciation = () => {
+    if ('speechSynthesis' in window && questions[currentQuestion]) {
+      const utterance = new SpeechSynthesisUtterance(questions[currentQuestion].word)
+      utterance.lang = 'en-US'
+      speechSynthesis.speak(utterance)
+    }
+  }
 
   const handleAnswerSelect = (answer: string) => {
     setSelectedAnswer(answer)
@@ -89,59 +161,29 @@ export default function QuizPage() {
     if (!selectedAnswer) return
 
     const isCorrect = selectedAnswer === questions[currentQuestion].correctAnswer
-    const currentWord = questions[currentQuestion].word
     const newAnswers = [...answers, {
       correct: isCorrect,
       selected: selectedAnswer,
-      correct_answer: questions[currentQuestion].correctAnswer
+      correctAnswer: questions[currentQuestion].correctAnswer
     }]
     setAnswers(newAnswers)
 
-    const newScore = isCorrect ? score + 1 : score
-    setScore(newScore)
+    if (isCorrect) {
+      setScore(score + 1)
+      setStreak(streak + 1)
+      setBestStreak(Math.max(bestStreak, streak + 1))
+      setSessionXP(sessionXP + (15 + (streak * 2))) // 스트릭 보너스
+    } else {
+      setStreak(0)
+    }
 
-    // 로그인한 사용자의 경우 진도와 답변 저장
-    if (user && sessionId) {
-      try {
-        // 학습 진도 업데이트
-        await updateProgress(currentWord.id, isCorrect)
-
-        // 퀴즈 답변 저장
-        await supabase
-          .from('quiz_answers')
-          .insert({
-            session_id: sessionId,
-            word_id: currentWord.id,
-            user_answer: selectedAnswer,
-            correct_answer: questions[currentQuestion].correctAnswer,
-            is_correct: isCorrect
-          })
-      } catch (error) {
-        console.error('Error saving quiz answer:', error)
-      }
+    // 진도 업데이트
+    if (user) {
+      await updateProgress(questions[currentQuestion].id, isCorrect)
     }
 
     if (currentQuestion + 1 >= questions.length) {
-      // 퀴즈 완료 시 세션 업데이트
-      if (user && sessionId) {
-        try {
-          const endTime = new Date()
-          const duration = Math.round((endTime.getTime() - startTime.getTime()) / 1000)
-          
-          await supabase
-            .from('quiz_sessions')
-            .update({
-              completed_at: endTime.toISOString(),
-              correct_answers: newScore,
-              score: Math.round((newScore / questions.length) * 100),
-              duration_seconds: duration
-            })
-            .eq('id', sessionId)
-        } catch (error) {
-          console.error('Error updating quiz session:', error)
-        }
-      }
-      setShowResult(true)
+      setGameState('finished')
     } else {
       setCurrentQuestion(currentQuestion + 1)
       setSelectedAnswer('')
@@ -149,39 +191,220 @@ export default function QuizPage() {
   }
 
   const resetQuiz = () => {
+    setGameState('ready')
     setCurrentQuestion(0)
     setSelectedAnswer('')
-    setShowResult(false)
     setScore(0)
+    setTimeElapsed(0)
+    setStreak(0)
+    setSessionXP(0)
     setAnswers([])
-    // Regenerate questions
-    const shuffled = [...vocabData].sort(() => Math.random() - 0.5)
-    const selectedWords = shuffled.slice(0, 10)
-    
-    const quizQuestions: QuizQuestion[] = selectedWords.map(word => {
-      const incorrectOptions = vocabData
-        .filter(w => w.id !== word.id)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3)
-        .map(w => w.definition)
-      
-      const options = [word.definition, ...incorrectOptions].sort(() => Math.random() - 0.5)
-      
-      return {
-        word,
-        options,
-        correctAnswer: word.definition
-      }
-    })
-    
-    setQuestions(quizQuestions)
   }
 
-  if (questions.length === 0) {
+  if (gameState === 'ready') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6">
+        <div className="mx-auto max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            {/* 헤더 */}
+            <div className="mb-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-green-500 to-blue-600 text-4xl mx-auto mb-4 shadow-2xl"
+              >
+                <Brain className="h-12 w-12 text-white" />
+              </motion.div>
+              
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">도전 퀴즈</h1>
+              <p className="text-lg text-gray-600">
+                실력을 테스트하고 XP를 획득하세요!
+              </p>
+            </div>
+
+            {/* 퀴즈 정보 */}
+            <Card className="border-0 shadow-xl mb-8">
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-blue-100 text-blue-600 mx-auto mb-3">
+                      <Target className="h-8 w-8" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900">5문제</h3>
+                    <p className="text-sm text-gray-600">선별된 어휘 문제</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-purple-100 text-purple-600 mx-auto mb-3">
+                      <Zap className="h-8 w-8" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900">XP 획득</h3>
+                    <p className="text-sm text-gray-600">스트릭 보너스 포함</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-orange-100 text-orange-600 mx-auto mb-3">
+                      <Timer className="h-8 w-8" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900">시간 제한 없음</h3>
+                    <p className="text-sm text-gray-600">충분히 생각하세요</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 시작 버튼 */}
+            <Button
+              onClick={startQuiz}
+              size="lg"
+              className="w-full h-16 text-lg bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
+            >
+              <Brain className="h-6 w-6 mr-3" />
+              퀴즈 시작하기
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  if (gameState === 'finished') {
+    const accuracy = Math.round((score / questions.length) * 100)
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4 md:p-6">
+        <div className="mx-auto max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {/* 결과 헤더 */}
+            <Card className="border-0 shadow-xl mb-6">
+              <CardContent className="p-8 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="mb-6"
+                >
+                  <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">퀴즈 완료!</h1>
+                  <p className="text-gray-600">수고하셨습니다!</p>
+                </motion.div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-4xl font-bold text-blue-600 mb-1">{score}/{questions.length}</p>
+                    <p className="text-sm text-gray-600">정답 수</p>
+                  </div>
+                  <div>
+                    <p className="text-4xl font-bold text-green-600 mb-1">{accuracy}%</p>
+                    <p className="text-sm text-gray-600">정답률</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 상세 통계 */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-4 text-center">
+                  <Timer className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                  <p className="text-xl font-bold">{formatTime(timeElapsed)}</p>
+                  <p className="text-xs text-muted-foreground">소요 시간</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-4 text-center">
+                  <Flame className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                  <p className="text-xl font-bold">{bestStreak}</p>
+                  <p className="text-xs text-muted-foreground">최대 스트릭</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* XP 획득 */}
+            <Card className="border-0 shadow-xl mb-6 bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+              <CardContent className="p-6 text-center">
+                <Zap className="h-12 w-12 mx-auto mb-3" />
+                <p className="text-3xl font-bold mb-2">{sessionXP} XP</p>
+                <p className="text-purple-100">획득한 경험치</p>
+              </CardContent>
+            </Card>
+
+            {/* 상세 결과 */}
+            <Card className="border-0 shadow-md mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg">상세 결과</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {questions.map((question, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      {answers[index].correct ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <span className="font-medium">{question.word}</span>
+                      <Badge className={cn("text-xs", difficultyColors[question.difficulty as keyof typeof difficultyColors])}>
+                        {question.difficulty === 'basic' ? '기초' : 
+                         question.difficulty === 'intermediate' ? '중급' : '고급'}
+                      </Badge>
+                    </div>
+                    {answers[index].correct && (
+                      <Star className="h-4 w-4 text-yellow-500" />
+                    )}
+                  </motion.div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* 액션 버튼 */}
+            <div className="flex gap-4">
+              <Button
+                onClick={resetQuiz}
+                variant="outline"
+                className="flex-1 h-12"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                다시 도전
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/learn'}
+                className="flex-1 h-12 bg-blue-600 hover:bg-blue-700"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                학습하기
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  // 퀴즈 진행 중
+  const currentQ = questions[currentQuestion]
+  const progress = ((currentQuestion + 1) / questions.length) * 100
+
+  if (!currentQ) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 md:p-6 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">퀴즈를 준비하고 있습니다...</h2>
+          <h2 className="text-2xl font-bold mb-4">문제를 불러오는 중...</h2>
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
         </div>
       </div>
@@ -189,143 +412,95 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-primary">📚 고등 어휘 마스터</Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">홈</Link>
-            {user && (
-              <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">대시보드</Link>
-            )}
-            <Link href="/flashcard" className="text-sm font-medium hover:text-primary transition-colors">플래시카드</Link>
-            <Link href="/quiz" className="text-sm font-medium text-primary">퀴즈</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            {authLoading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            ) : user ? (
-              <>
-                {profile?.avatar_url && (
-                  <img src={profile.avatar_url} alt="Profile" className="w-8 h-8 rounded-full" />
-                )}
-                <span className="text-sm font-medium">{profile?.name || user.email}</span>
-                <Button variant="outline" size="sm" onClick={signOut}>로그아웃</Button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login">
-                  <Button variant="outline" size="sm">로그인</Button>
-                </Link>
-                <Link href="/auth/login">
-                  <Button size="sm">회원가입</Button>
-                </Link>
-              </>
-            )}
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 md:p-6">
+      {/* 상단 상태 바 */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Timer className="h-5 w-5 text-blue-500" />
+              <span className="font-bold text-blue-600">{formatTime(timeElapsed)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Flame className="h-5 w-5 text-orange-500" />
+              <span className="font-bold text-orange-600">{streak}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <span className="font-bold text-yellow-600">{score}</span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {showResult ? (
-          // Results Screen
-          <div className="max-w-2xl mx-auto">
-            <Card>
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+          <span>문제 {currentQuestion + 1} / {questions.length}</span>
+          <span>{Math.round(progress)}% 완료</span>
+        </div>
+        <Progress value={progress} className="h-3" />
+      </motion.div>
+
+      {/* 메인 퀴즈 카드 */}
+      <div className="mx-auto max-w-2xl">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestion}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="border-0 shadow-xl">
               <CardHeader className="text-center">
-                <CardTitle className="text-3xl">🎉 퀴즈 완료!</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="text-center">
-                  <div className="text-6xl font-bold text-primary mb-2">
-                    {score}/{questions.length}
-                  </div>
-                  <p className="text-xl text-gray-600">
-                    정답률: {Math.round((score / questions.length) * 100)}%
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">상세 결과</h3>
-                  {questions.map((question, index) => (
-                    <div key={index} className="p-3 rounded-lg border bg-white">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
-                          answers[index].correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {answers[index].correct ? '✓' : '✗'}
-                        </span>
-                        <span className="font-medium">{question.word.word}</span>
-                      </div>
-                      {!answers[index].correct && (
-                        <div className="ml-8 text-sm">
-                          <p className="text-red-600">선택: {answers[index].selected}</p>
-                          <p className="text-green-600">정답: {answers[index].correct_answer}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-4 justify-center pt-4">
-                  <Button onClick={resetQuiz} size="lg">
-                    다시 도전하기
-                  </Button>
-                  <Link href="/flashcard">
-                    <Button variant="outline" size="lg">
-                      플래시카드로 복습
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          // Quiz Screen
-          <div className="max-w-2xl mx-auto">
-            {/* Progress */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>문제 {currentQuestion + 1} / {questions.length}</span>
-                <span>점수: {score}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center text-2xl">
-                  {questions[currentQuestion].word.word}
+                <Badge className={cn("mb-4 mx-auto w-fit", difficultyColors[currentQ.difficulty as keyof typeof difficultyColors])}>
+                  {currentQ.difficulty === 'basic' ? '기초' : 
+                   currentQ.difficulty === 'intermediate' ? '중급' : '고급'}
+                </Badge>
+                
+                <CardTitle className="text-4xl font-bold text-gray-900">
+                  {currentQ.word}
                 </CardTitle>
-                {questions[currentQuestion].word.pronunciation && (
-                  <p className="text-center text-gray-500">
-                    {questions[currentQuestion].word.pronunciation}
-                  </p>
-                )}
+                
+                <p className="text-lg text-gray-600 mt-2">
+                  {currentQ.pronunciation}
+                </p>
+                
+                <Button
+                  variant="ghost"
+                  onClick={playPronunciation}
+                  className="mt-2 w-fit mx-auto"
+                >
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  발음 듣기
+                </Button>
               </CardHeader>
-              <CardContent className="space-y-4">
+
+              <CardContent>
                 <p className="text-center text-lg font-medium mb-6">
                   다음 단어의 뜻으로 올바른 것은?
                 </p>
                 
                 <div className="space-y-3">
-                  {questions[currentQuestion].options.map((option, index) => (
-                    <Button
+                  {currentQ.options.map((option, index) => (
+                    <motion.div
                       key={index}
-                      variant={selectedAnswer === option ? "default" : "outline"}
-                      className="w-full p-4 h-auto text-left justify-start"
-                      onClick={() => handleAnswerSelect(option)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <span className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center mr-3 text-xs font-bold">
-                        {String.fromCharCode(65 + index)}
-                      </span>
-                      {option}
-                    </Button>
+                      <Button
+                        variant={selectedAnswer === option ? "default" : "outline"}
+                        className="w-full p-4 h-auto text-left justify-start"
+                        onClick={() => handleAnswerSelect(option)}
+                      >
+                        <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3 text-sm font-bold">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        {option}
+                      </Button>
+                    </motion.div>
                   ))}
                 </div>
 
@@ -334,14 +509,15 @@ export default function QuizPage() {
                     onClick={handleNextQuestion}
                     disabled={!selectedAnswer}
                     size="lg"
+                    className="h-12 px-8"
                   >
                     {currentQuestion + 1 === questions.length ? '결과 보기' : '다음 문제'}
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )

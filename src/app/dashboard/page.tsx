@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,7 +11,7 @@ import { useLearningProgress } from '@/hooks/useLearningProgress'
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading, signOut } = useAuth()
-  const { progress, loading: progressLoading, getOverallStats, getWeakWords, getStrongWords } = useLearningProgress()
+  const { loading: progressLoading, getOverallStats, getWeakWords, getStrongWords } = useLearningProgress()
   const router = useRouter()
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function DashboardPage() {
           </nav>
           <div className="flex items-center gap-2">
             {profile?.avatar_url && (
-              <img src={profile.avatar_url} alt="Profile" className="w-8 h-8 rounded-full" />
+              <Image src={profile.avatar_url} alt="Profile" width={32} height={32} className="rounded-full" />
             )}
             <span className="text-sm font-medium">{profile?.name || user.email}</span>
             <Button variant="outline" size="sm" onClick={signOut}>

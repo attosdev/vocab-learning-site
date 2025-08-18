@@ -1,198 +1,394 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { VocabCard } from '@/components/VocabCard'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { vocabData } from '@/data/vocab-data'
+import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/hooks/useAuth'
 import { useLearningProgress } from '@/hooks/useLearningProgress'
-import Link from 'next/link'
+import {
+  Volume2,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Shuffle,
+  Trophy,
+  Target,
+  Flame,
+  CheckCircle,
+  XCircle,
+  Zap,
+  Star,
+  Timer,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+// Mock data - 실제로는 Supabase에서 가져와야 함
+const mockWords = [
+  {
+    id: 1,
+    word: "abundant",
+    pronunciation: "/əˈbʌndənt/",
+    meaning: "풍부한, 많은",
+    example: "The forest was abundant with wildlife.",
+    exampleTranslation: "그 숲은 야생동물이 풍부했다.",
+    difficulty: "intermediate"
+  },
+  {
+    id: 2,
+    word: "reluctant",
+    pronunciation: "/rɪˈlʌktənt/",
+    meaning: "꺼리는, 마지못한",
+    example: "She was reluctant to speak in public.",
+    exampleTranslation: "그녀는 공개적으로 말하기를 꺼렸다.",
+    difficulty: "intermediate"
+  },
+  {
+    id: 3,
+    word: "demonstrate",
+    pronunciation: "/ˈdemənstreɪt/",
+    meaning: "보여주다, 실증하다",
+    example: "The teacher will demonstrate the experiment.",
+    exampleTranslation: "선생님이 실험을 시연해 주실 것이다.",
+    difficulty: "basic"
+  },
+  {
+    id: 4,
+    word: "magnificent",
+    pronunciation: "/mæɡˈnɪfɪsənt/",
+    meaning: "장엄한, 웅장한",
+    example: "The view from the mountain was magnificent.",
+    exampleTranslation: "산에서 본 경치는 장관이었다.",
+    difficulty: "advanced"
+  },
+  {
+    id: 5,
+    word: "persistent",
+    pronunciation: "/pərˈsɪstənt/",
+    meaning: "지속적인, 끈질긴",
+    example: "His persistent efforts finally paid off.",
+    exampleTranslation: "그의 끈질긴 노력이 마침내 결실을 맺었다.",
+    difficulty: "advanced"
+  }
+]
+
+const difficultyColors = {
+  basic: "bg-green-100 text-green-800",
+  intermediate: "bg-yellow-100 text-yellow-800",
+  advanced: "bg-red-100 text-red-800"
+}
 
 export default function FlashcardPage() {
-  const { user, profile, loading: authLoading, signOut } = useAuth()
-  const { updateProgress, getWordProgress } = useLearningProgress()
+  const { user } = useAuth()
+  const { updateProgress } = useLearningProgress()
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isFlipped, setIsFlipped] = useState(false)
   const [studiedWords, setStudiedWords] = useState<Set<number>>(new Set())
-  const [showAnswer, setShowAnswer] = useState(false)
+  const [correctWords, setCorrectWords] = useState<Set<number>>(new Set())
+  const [sessionXP, setSessionXP] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [timeElapsed, setTimeElapsed] = useState(0)
 
-  const currentWord = vocabData[currentIndex]
-  const totalWords = vocabData.length
+  const currentWord = mockWords[currentIndex]
+  const totalWords = mockWords.length
+  const progress = (studiedWords.size / totalWords) * 100
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeElapsed(prev => prev + 1)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  if (!currentWord) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4 md:p-6 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">카드를 불러오는 중...</h2>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    )
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const playPronunciation = () => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(currentWord.word)
+      utterance.lang = 'en-US'
+      speechSynthesis.speak(utterance)
+    }
+  }
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped)
+  }
 
   const handleNext = () => {
-    setStudiedWords(prev => new Set(prev).add(currentWord.id))
     setCurrentIndex((prev) => (prev + 1) % totalWords)
-    setShowAnswer(false)
+    setIsFlipped(false)
   }
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + totalWords) % totalWords)
-    setShowAnswer(false)
+    setIsFlipped(false)
   }
 
-  const handleAnswerResult = async (isCorrect: boolean) => {
-    if (user) {
-      await updateProgress(currentWord.id, isCorrect)
+  const handleKnow = async () => {
+    if (!correctWords.has(currentWord.id)) {
+      setCorrectWords(prev => new Set(prev).add(currentWord.id))
+      setStreak(streak + 1)
+      setSessionXP(sessionXP + 15)
     }
     setStudiedWords(prev => new Set(prev).add(currentWord.id))
-    setShowAnswer(false)
-    setCurrentIndex((prev) => (prev + 1) % totalWords)
+    
+    if (user) {
+      await updateProgress(currentWord.id, true)
+    }
+    
+    handleNext()
   }
 
-  const progress = (studiedWords.size / totalWords) * 100
-  const wordProgress = user ? getWordProgress(currentWord.id) : null
+  const handleDontKnow = async () => {
+    setStudiedWords(prev => new Set(prev).add(currentWord.id))
+    setStreak(0)
+    
+    if (user) {
+      await updateProgress(currentWord.id, false)
+    }
+    
+    handleNext()
+  }
+
+  const shuffleCards = () => {
+    const randomIndex = Math.floor(Math.random() * totalWords)
+    setCurrentIndex(randomIndex)
+    setIsFlipped(false)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-primary">📚 고등 어휘 마스터</Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">홈</Link>
-            {user && (
-              <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">대시보드</Link>
-            )}
-            <Link href="/flashcard" className="text-sm font-medium text-primary">플래시카드</Link>
-            <Link href="/quiz" className="text-sm font-medium hover:text-primary transition-colors">퀴즈</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            {authLoading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            ) : user ? (
-              <>
-                {profile?.avatar_url && (
-                  <img src={profile.avatar_url} alt="Profile" className="w-8 h-8 rounded-full" />
-                )}
-                <span className="text-sm font-medium">{profile?.name || user.email}</span>
-                <Button variant="outline" size="sm" onClick={signOut}>로그아웃</Button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login">
-                  <Button variant="outline" size="sm">로그인</Button>
-                </Link>
-                <Link href="/auth/login">
-                  <Button size="sm">회원가입</Button>
-                </Link>
-              </>
-            )}
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4 md:p-6">
+      {/* 헤더 */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">플래시카드 복습</h1>
+            <p className="text-gray-600">카드를 클릭해서 뜻을 확인하세요</p>
+          </div>
+          
+          {/* 상태 표시 */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Timer className="h-5 w-5 text-blue-500" />
+              <span className="font-bold text-blue-600">{formatTime(timeElapsed)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Flame className="h-5 w-5 text-orange-500" />
+              <span className="font-bold text-orange-600">{streak}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-purple-500" />
+              <span className="font-bold text-purple-600">{sessionXP} XP</span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Progress Section */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">학습 진행상황</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>진행률: {progress.toFixed(1)}%</span>
-                  <span>{currentIndex + 1} / {totalWords}</span>
+        {/* 진행률 */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>{currentIndex + 1} / {totalWords}</span>
+            <span>{Math.round(progress)}% 완료</span>
+          </div>
+          <Progress value={progress} className="mt-2 h-3" />
+        </div>
+      </motion.div>
+
+      {/* 메인 플래시카드 */}
+      <div className="mx-auto max-w-2xl">
+        <motion.div className="relative perspective-1000 mb-6">
+          <motion.div
+            key={currentIndex}
+            initial={{ rotateY: -90, opacity: 0 }}
+            animate={{ rotateY: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="preserve-3d"
+          >
+            <Card 
+              className="border-0 shadow-2xl cursor-pointer min-h-[400px] relative"
+              onClick={handleFlip}
+            >
+              <motion.div
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6 }}
+                className="preserve-3d w-full h-full"
+              >
+                {/* 앞면 - 단어 */}
+                <div className={cn(
+                  "absolute inset-0 backface-hidden",
+                  isFlipped && "invisible"
+                )}>
+                  <CardContent className="flex flex-col items-center justify-center h-[400px] p-8">
+                    <Badge className={cn("mb-4", difficultyColors[currentWord.difficulty as keyof typeof difficultyColors])}>
+                      {currentWord.difficulty === 'basic' ? '기초' : 
+                       currentWord.difficulty === 'intermediate' ? '중급' : '고급'}
+                    </Badge>
+                    
+                    <h2 className="text-5xl font-bold text-gray-900 mb-4 text-center">
+                      {currentWord.word}
+                    </h2>
+                    
+                    <p className="text-xl text-gray-600 mb-6">
+                      {currentWord.pronunciation}
+                    </p>
+                    
+                    <Button
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        playPronunciation()
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Volume2 className="h-5 w-5" />
+                      발음 듣기
+                    </Button>
+                    
+                    <p className="text-sm text-gray-500 mt-8">카드를 클릭하여 뜻 보기</p>
+                  </CardContent>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>학습한 단어: {studiedWords.size}개</span>
-                  <span>남은 단어: {totalWords - studiedWords.size}개</span>
-                </div>
-                {user && wordProgress && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <div className="flex justify-between items-center text-sm">
-                      <span>현재 단어 숙련도:</span>
-                      <span className="font-bold text-blue-600">{Math.round(wordProgress.mastery_level)}%</span>
+
+                {/* 뒷면 - 뜻과 예문 */}
+                <div className={cn(
+                  "absolute inset-0 backface-hidden rotateY-180",
+                  !isFlipped && "invisible"
+                )}>
+                  <CardContent className="flex flex-col justify-center h-[400px] p-8">
+                    <div className="text-center mb-6">
+                      <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                        {currentWord.meaning}
+                      </h3>
                     </div>
-                    <div className="flex justify-between text-xs text-gray-600 mt-1">
-                      <span>정답: {wordProgress.correct_count}회</span>
-                      <span>오답: {wordProgress.incorrect_count}회</span>
-                      <span>연속: {wordProgress.streak_count}회</span>
+                    
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+                      <h4 className="font-semibold text-gray-700 mb-3">예문</h4>
+                      <p className="text-gray-900 mb-3 italic text-lg">
+                        &ldquo;{currentWord.example}&rdquo;
+                      </p>
+                      <p className="text-gray-600">
+                        {currentWord.exampleTranslation}
+                      </p>
                     </div>
-                  </div>
-                )}
-              </div>
+                    
+                    <p className="text-sm text-gray-500 mt-6 text-center">카드를 클릭하여 단어 보기</p>
+                  </CardContent>
+                </div>
+              </motion.div>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* 답변 버튼 (뒷면일 때만) */}
+        <AnimatePresence>
+          {isFlipped && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="flex gap-4 mb-6"
+            >
+              <Button
+                onClick={handleDontKnow}
+                variant="outline"
+                className="flex-1 h-14 text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <XCircle className="h-5 w-5 mr-2" />
+                모르겠어요
+              </Button>
+              <Button
+                onClick={handleKnow}
+                className="flex-1 h-14 bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="h-5 w-5 mr-2" />
+                알고 있어요
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 네비게이션 버튼 */}
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            className="h-12 px-6"
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            이전
+          </Button>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsFlipped(false)}
+              className="h-12 px-4"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={shuffleCards}
+              className="h-12 px-4"
+            >
+              <Shuffle className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            className="h-12 px-6"
+          >
+            다음
+            <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+
+        {/* 통계 카드 */}
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-4 text-center">
+              <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold">{studiedWords.size}</p>
+              <p className="text-xs text-muted-foreground">학습 완료</p>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Flashcard Section */}
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">플래시카드 학습</h1>
-            <p className="text-gray-600">카드를 클릭하면 뜻을 확인할 수 있습니다</p>
-          </div>
-
-          <VocabCard
-            word={currentWord}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            onFlip={setShowAnswer}
-          />
-
-          {/* 학습 결과 버튼 (로그인한 사용자만) */}
-          {user && showAnswer && (
-            <div className="text-center mt-6">
-              <p className="text-lg font-medium mb-4">이 단어를 알고 계셨나요?</p>
-              <div className="flex gap-4 justify-center">
-                <Button 
-                  onClick={() => handleAnswerResult(true)}
-                  className="bg-green-600 hover:bg-green-700"
-                  size="lg"
-                >
-                  ✅ 알고 있어요
-                </Button>
-                <Button 
-                  onClick={() => handleAnswerResult(false)}
-                  variant="destructive"
-                  size="lg"
-                >
-                  ❌ 모르겠어요
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex justify-center gap-4 mt-8">
-            <Button 
-              variant="outline" 
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-            >
-              ← 이전 단어
-            </Button>
-            <Button onClick={handleNext}>
-              다음 단어 →
-            </Button>
-          </div>
-
-          {/* Word Navigation */}
-          <div className="mt-8 flex justify-center gap-2 flex-wrap">
-            <span className="text-sm text-gray-600 mr-4">단어 선택:</span>
-            {vocabData.slice(Math.max(0, currentIndex - 5), Math.min(totalWords, currentIndex + 6)).map((word, idx) => {
-              const wordIndex = Math.max(0, currentIndex - 5) + idx
-              return (
-                <Button
-                  key={word.id}
-                  variant={wordIndex === currentIndex ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentIndex(wordIndex)}
-                  className={`w-8 h-8 p-0 ${
-                    studiedWords.has(word.id) ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''
-                  }`}
-                >
-                  {wordIndex + 1}
-                </Button>
-              )
-            })}
-          </div>
+          
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-4 text-center">
+              <Star className="h-8 w-8 text-green-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold">{correctWords.size}</p>
+              <p className="text-xs text-muted-foreground">정답</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-4 text-center">
+              <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+              <p className="text-2xl font-bold">{sessionXP}</p>
+              <p className="text-xs text-muted-foreground">획득 XP</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
