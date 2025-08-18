@@ -6,23 +6,6 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 
-  // 디버깅을 위한 임시 HTML 응답
-  if (!code) {
-    return new Response(`
-      <html>
-        <body>
-          <h1>OAuth Callback Debug</h1>
-          <p><strong>URL:</strong> ${request.url}</p>
-          <p><strong>Code:</strong> ${code || 'MISSING'}</p>
-          <p><strong>Search Params:</strong> ${Array.from(searchParams.entries()).map(([k,v]) => `${k}=${v}`).join(', ')}</p>
-          <p><strong>Supabase URL:</strong> ${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'exists' : 'missing'}</p>
-          <p><strong>Supabase Key:</strong> ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'exists' : 'missing'}</p>
-          <a href="/auth/login">Back to Login</a>
-        </body>
-      </html>
-    `, { headers: { 'content-type': 'text/html' } })
-  }
-
   if (code) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,19 +16,9 @@ export async function GET(request: NextRequest) {
     
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
-    } else {
-      return new Response(`
-        <html>
-          <body>
-            <h1>OAuth Exchange Error</h1>
-            <p><strong>Error:</strong> ${error.message}</p>
-            <p><strong>Code:</strong> ${code}</p>
-            <a href="/auth/login">Back to Login</a>
-          </body>
-        </html>
-      `, { headers: { 'content-type': 'text/html' } })
     }
   }
 
+  // 오류 발생 시 로그인 페이지로 리다이렉트
   return NextResponse.redirect(`${origin}/auth/login`)
 }
