@@ -83,7 +83,7 @@ export function useAuth() {
                 }
                 
                 // 세션 수동 설정
-                await supabase.auth.setSession(session as any)
+                await supabase.auth.setSession(session as { access_token: string; refresh_token: string; expires_in: number; expires_at: number; token_type: string; user: unknown })
                 console.log('✅ Session set manually')
               } catch (sessionError) {
                 console.log('Manual session setting failed, continuing with direct API calls')
