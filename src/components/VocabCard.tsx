@@ -52,7 +52,7 @@ export function VocabCard({ word, showDefinition = false, onNext, onPrevious, on
                 <div className="space-y-1">
                   {word.examples.slice(0, 2).map((example, index) => (
                     <p key={index} className="text-sm italic">
-                      "{example}"
+                      &quot;{example}&quot;
                     </p>
                   ))}
                 </div>

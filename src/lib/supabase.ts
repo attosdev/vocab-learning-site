@@ -83,5 +83,5 @@ export interface UserAchievement {
   achievement_name: string
   description?: string
   earned_at: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
