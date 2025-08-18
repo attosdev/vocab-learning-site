@@ -66,9 +66,13 @@ export function useAuth() {
               }
               
               // localStorage에 토큰 저장
+              console.log('💾 Saving token to localStorage...')
               localStorage.setItem('supabase_access_token', accessToken)
+              console.log('💾 Token saved successfully')
+              
               if (refreshToken) {
                 localStorage.setItem('supabase_refresh_token', refreshToken)
+                console.log('💾 Refresh token saved')
               }
               
               setUser(user as User)
@@ -116,8 +120,10 @@ export function useAuth() {
       }
       
       // localStorage에서 토큰 복원 시도
+      console.log('🔄 Checking localStorage...')
       const savedToken = localStorage.getItem('supabase_access_token')
-      console.log('🔄 Checking saved token:', !!savedToken)
+      console.log('🔄 Saved token found:', !!savedToken)
+      console.log('🔄 Token first 50 chars:', savedToken?.substring(0, 50))
       
       if (savedToken) {
         try {
