@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Word } from '@/lib/supabase'
 import { TTSManager } from '@/lib/tts'
-import { useVocabStore } from '@/lib/store'
 import {
   Volume2,
   VolumeX,
@@ -42,7 +41,6 @@ export default function StudyCard({
   const [isDragging, setIsDragging] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const tts = TTSManager.getInstance()
-  const { } = useVocabStore()
 
   // Reset flip state when word changes
   useEffect(() => {
