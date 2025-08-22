@@ -51,10 +51,8 @@ export default function PackDetailPage() {
   const handleStartStudy = (mode: 'flashcard' | 'quiz' | 'spelling') => {
     if (!pack || words.length === 0) return
     
-    // For review mode, filter words that need review
-    const studyWords = mode === 'review' 
-      ? words.filter(word => getWordsForReview().includes(word.id))
-      : words
+    // Use all words for now
+    const studyWords = words
 
     if (studyWords.length === 0) {
       alert('복습할 단어가 없습니다!')
