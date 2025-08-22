@@ -5,83 +5,75 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// 데이터베이스 타입 정의
-export interface UserProfile {
+// Types for PRD-based schema
+export interface WordPack {
   id: string
-  email: string
-  name: string
-  avatar_url?: string
+  slug: string
+  title: string
+  level: 'beginner' | 'intermediate' | 'advanced' | 'exam' | 'topic'
+  description: string
+  total_words: number
+  is_published: boolean
   created_at: string
-  updated_at: string
 }
 
-export interface VocabularyWord {
-  id: number
-  word: string
-  definition: string
-  pronunciation?: string
-  part_of_speech: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
-  category: string
-  examples: string[]
+export interface Word {
+  id: string
+  pack_id: string
+  term: string
+  phonetic?: string
+  pos?: string
+  meaning_ko: string
+  meaning_en?: string
+  examples: Array<{ en: string; ko: string }>
   synonyms: string[]
   antonyms: string[]
+  audio_url?: string
+  tags: string[]
+  order_index: number
   created_at: string
 }
 
-export interface LearningProgress {
-  id: string
-  user_id: string
-  word_id: number
-  correct_count: number
-  incorrect_count: number
-  last_reviewed: string
-  mastery_level: number
-  streak_count: number
-  created_at: string
-  updated_at: string
+// API Functions
+export async function fetchWordPacks(): Promise<WordPack[]> {
+  const { data, error } = await supabase
+    .from('word_packs')
+    .select('*')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
 }
 
-export interface QuizSession {
-  id: string
-  user_id: string
-  quiz_type: string
-  total_questions: number
-  correct_answers: number
-  score: number
-  started_at: string
-  completed_at?: string
-  duration_seconds?: number
+export async function fetchWordsByPack(slug: string, limit = 50): Promise<Word[]> {
+  const { data: pack } = await supabase
+    .from('word_packs')
+    .select('id')
+    .eq('slug', slug)
+    .single()
+
+  if (!pack) return []
+
+  const { data, error } = await supabase
+    .from('words')
+    .select('*')
+    .eq('pack_id', pack.id)
+    .order('order_index', { ascending: true })
+    .limit(limit)
+
+  if (error) throw error
+  return data || []
 }
 
-export interface QuizAnswer {
-  id: string
-  session_id: string
-  word_id: number
-  user_answer: string
-  correct_answer: string
-  is_correct: boolean
-  response_time_ms?: number
-  created_at: string
-}
+export async function fetchWordPack(slug: string): Promise<WordPack | null> {
+  const { data, error } = await supabase
+    .from('word_packs')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single()
 
-export interface LearningSession {
-  id: string
-  user_id: string
-  session_type: 'flashcard' | 'review' | 'quiz' | 'practice'
-  words_studied: number[]
-  duration_seconds?: number
-  words_learned: number
-  started_at: string
-  completed_at?: string
-}
-
-export interface UserAchievement {
-  id: string
-  user_id: string
-  achievement_type: string
-  achievement_name: string
-  description?: string
-  earned_at: string
-  metadata: Record<string, unknown>
+  if (error) return null
+  return data
 }

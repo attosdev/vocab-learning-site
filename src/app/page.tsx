@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import {
   BookOpen,
@@ -13,169 +12,236 @@ import {
   Flame,
   Zap,
   ChevronRight,
+  Play,
+  Star,
+  TrendingUp,
 } from 'lucide-react'
+import { useVocabStore } from '@/lib/store'
+import { fetchWordPacks, WordPack } from '@/lib/supabase'
 
-// 🚀 혁신적인 TikTok 스타일 로그인 페이지
-function LoginPage() {
-  const { signInWithGoogle } = useAuth()
-  
+// Modern vocabulary learning homepage
+function VocabHomePage() {
+  const [wordPacks, setWordPacks] = useState<WordPack[]>([])
+  const [loading, setLoading] = useState(true)
+  const { settings, srsProgress, getWordsForReview } = useVocabStore()
+
+  useEffect(() => {
+    async function loadWordPacks() {
+      try {
+        const packs = await fetchWordPacks()
+        setWordPacks(packs)
+      } catch (error) {
+        console.error('Failed to load word packs:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadWordPacks()
+  }, [])
+
+  const reviewWords = getWordsForReview()
+  const totalProgress = Object.keys(srsProgress).length
+  const masteredWords = Object.values(srsProgress).filter(p => p.reps >= 3).length
+
+  const getLevelInfo = (level: WordPack['level']) => {
+    const configs = {
+      beginner: { color: 'from-green-500 to-emerald-500', emoji: '🌱', label: '초급' },
+      intermediate: { color: 'from-blue-500 to-cyan-500', emoji: '🌊', label: '중급' },
+      advanced: { color: 'from-purple-500 to-violet-500', emoji: '🚀', label: '고급' },
+      exam: { color: 'from-orange-500 to-red-500', emoji: '🎯', label: '시험' },
+      topic: { color: 'from-pink-500 to-rose-500', emoji: '📚', label: '주제별' },
+    }
+    return configs[level] || configs.beginner
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full"
+        />
+      </div>
+    )
+  }
+
   return (
-    <div className="relative min-h-screen overflow-hidden full-screen">
-      {/* 🌊 동적 배경 시스템 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-pink-900">
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="#9C92AC" fill-opacity="0.1"><circle cx="30" cy="30" r="4"/></g></g></svg>')}")`,
-        }}></div>
-        
-        {/* 🎨 플로팅 요소들 */}
-        <div className="absolute -left-10 top-1/4 w-80 h-80 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute -right-10 top-3/4 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl animate-float" style={{animationDelay: '-1s'}}></div>
-        <div className="absolute left-1/2 top-1/2 w-64 h-64 bg-gradient-to-br from-pink-400/20 to-yellow-400/20 rounded-full blur-2xl animate-float" style={{animationDelay: '-2s'}}></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
       </div>
 
-      {/* 🎭 메인 콘텐츠 */}
-      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 z-10">
+      <div className="relative z-10 p-6 max-w-7xl mx-auto">
+        {/* Hero Section */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, type: "spring", stiffness: 100 }}
-          className="w-full max-w-md space-y-8 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-12"
         >
-          {/* 🌟 혁신적 로고 */}
-          <div className="flex justify-center mb-12">
+          <div className="mb-8">
             <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.3 }}
-              className="relative"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl mb-6 shadow-2xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl blur-xl opacity-60 animate-pulse"></div>
-              <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl immersive-card neon-glow-primary">
-                <span className="text-5xl font-black text-gradient-primary">V</span>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-bounce">
-                  <span className="absolute inset-0 flex items-center justify-center text-xs">✨</span>
-                </div>
-              </div>
+              <Brain className="w-10 h-10 text-white" />
             </motion.div>
           </div>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
+            Vocab<span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Master</span>
+          </h1>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
+            스마트한 반복 학습으로 영어 단어를 효과적으로 마스터하세요
+          </p>
 
-          {/* 🎯 임팩트 타이틀 */}
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-12">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-2xl font-bold text-white">{reviewWords.length}</div>
+              <div className="text-sm text-slate-300">복습 예정</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-2xl font-bold text-white">{totalProgress}</div>
+              <div className="text-sm text-slate-300">학습 단어</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-2xl font-bold text-white">{masteredWords}</div>
+              <div className="text-sm text-slate-300">마스터</div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/study?mode=review">
+              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
+                <Play className="w-5 h-5 mr-2" />
+                복습 시작하기
+              </Button>
+            </Link>
+            <Link href="/study?mode=new">
+              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8 py-3 rounded-xl font-semibold">
+                <BookOpen className="w-5 h-5 mr-2" />
+                새 단어 학습
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Word Packs Grid */}
+        <section className="py-12">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
           >
-            <h1 className="text-6xl font-black text-gradient-primary mb-4 tracking-tight leading-tight">
-              VocabMaster
-            </h1>
-            <motion.p 
-              className="text-xl text-white/90 font-medium mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
-              🚀 AI가 만드는 단어 학습의 혁명
-            </motion.p>
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">단어 팩 선택</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wordPacks.map((pack, index) => {
+                const levelInfo = getLevelInfo(pack.level)
+                return (
+                  <motion.div
+                    key={pack.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    className="group"
+                  >
+                    <Link href={`/pack/${pack.slug}`}>
+                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer">
+                        {/* Level indicator */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r ${levelInfo.color} text-white text-sm font-medium`}>
+                            <span className="mr-1">{levelInfo.emoji}</span>
+                            {levelInfo.label}
+                          </div>
+                          <div className="text-2xl">{levelInfo.emoji}</div>
+                        </div>
+
+                        {/* Pack info */}
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                          {pack.title}
+                        </h3>
+                        <p className="text-slate-300 text-sm mb-4 line-clamp-2">
+                          {pack.description}
+                        </p>
+
+                        {/* Stats */}
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center text-slate-400">
+                            <BookOpen className="w-4 h-4 mr-1" />
+                            {pack.total_words} 단어
+                          </div>
+                          <div className="flex items-center text-purple-300">
+                            <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-12">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-white mb-4">스마트 학습 시스템</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto">
+              과학적인 SRS 알고리즘과 개인화된 학습 경험으로 효율적인 단어 암기를 지원합니다
+            </p>
           </motion.div>
 
-          {/* 🌈 인터랙티브 특징 카드 */}
-          <motion.div 
-            className="grid grid-cols-1 gap-4 py-8"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, staggerChildren: 0.1 }}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: "🧠", title: "AI 맞춤 학습", desc: "개인화된 학습 경험" },
-              { icon: "🎮", title: "게이미피케이션", desc: "재미있는 도전과 보상" },
-              { icon: "📊", title: "실시간 분석", desc: "학습 패턴 최적화" }
+              {
+                icon: <Brain className="w-8 h-8" />,
+                title: "스마트 복습",
+                description: "SRS 알고리즘으로 최적의 복습 타이밍을 제공합니다",
+                color: "from-purple-500 to-violet-500"
+              },
+              {
+                icon: <Target className="w-8 h-8" />,
+                title: "맞춤형 학습",
+                description: "개인의 학습 패턴을 분석하여 맞춤형 콘텐츠를 제공합니다",
+                color: "from-blue-500 to-cyan-500"
+              },
+              {
+                icon: <TrendingUp className="w-8 h-8" />,
+                title: "진도 추적",
+                description: "실시간으로 학습 진도와 성취도를 확인할 수 있습니다",
+                color: "from-green-500 to-emerald-500"
+              }
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                whileTap={{ scale: 0.95 }}
-                className="immersive-card p-6 cursor-pointer"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.9 + index * 0.1 }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="text-4xl">{feature.icon}</div>
-                  <div className="text-left">
-                    <h3 className="font-bold text-white text-lg">{feature.title}</h3>
-                    <p className="text-white/70 text-sm">{feature.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* 🎨 슈퍼 버튼 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <Button
-              onClick={signInWithGoogle}
-              size="lg"
-              className="w-full h-16 btn-primary text-lg font-bold rounded-2xl relative overflow-hidden group transform transition-all duration-300 hover:scale-105"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <svg className="mr-3 h-6 w-6" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              🚀 Google로 모험 시작하기
-            </Button>
-          </motion.div>
-
-          {/* 📊 실시간 통계 - 홀로그램 스타일 */}
-          <motion.div 
-            className="grid grid-cols-3 gap-6 pt-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-          >
-            {[
-              { number: "50K+", label: "🎯 학습 단어", glow: "from-blue-400 to-purple-400" },
-              { number: "15K+", label: "🎮 활성 사용자", glow: "from-purple-400 to-pink-400" },
-              { number: "99%", label: "⭐ 만족도", glow: "from-pink-400 to-yellow-400" }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                className="text-center"
-                whileHover={{ scale: 1.1 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5 + index * 0.1 }}
+                transition={{ delay: 0.6 + index * 0.1 }}
+                className="text-center"
               >
-                <div className={`inline-block p-4 rounded-2xl bg-gradient-to-br ${stat.glow} bg-opacity-20 backdrop-blur-sm`}>
-                  <p className="text-3xl font-black text-white mb-1">{stat.number}</p>
-                  <p className="text-xs text-white/80 font-medium">{stat.label}</p>
+                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl mb-6 shadow-lg`}>
+                  {feature.icon}
                 </div>
+                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                <p className="text-slate-300">{feature.description}</p>
               </motion.div>
             ))}
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* 🎵 배경 펄스 이펙트 */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
-        <motion.div
-          className="w-2 h-2 bg-white rounded-full"
-          animate={{
-            scale: [1, 2, 1],
-            opacity: [1, 0.5, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+          </div>
+        </section>
       </div>
     </div>
   )
@@ -461,15 +527,5 @@ function DashboardHome() {
 }
 
 export default function Home() {
-  const { user, loading } = useAuth()
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    )
-  }
-
-  return user ? <DashboardHome /> : <LoginPage />
+  return <VocabHomePage />
 }
