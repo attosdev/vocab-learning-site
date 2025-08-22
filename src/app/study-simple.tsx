@@ -122,7 +122,7 @@ export default function SimpleStudyPage() {
                 
                 {currentWord.examples && currentWord.examples.length > 0 && (
                   <div className="bg-white/10 rounded-xl p-4 text-left mb-6 w-full">
-                    {currentWord.examples.slice(0, 2).map((example: any, index: number) => (
+                    {currentWord.examples.slice(0, 2).map((example: { en: string; ko: string }, index: number) => (
                       <div key={index} className="mb-2">
                         <p className="text-white">{example.en}</p>
                         <p className="text-slate-300 text-sm">{example.ko}</p>

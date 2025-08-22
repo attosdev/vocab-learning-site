@@ -10,7 +10,6 @@ import {
   BookOpen,
   Play,
   Brain,
-  Shuffle,
   Clock,
   Target,
   ChevronLeft,

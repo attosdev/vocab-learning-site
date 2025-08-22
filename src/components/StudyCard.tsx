@@ -9,7 +9,6 @@ import { useVocabStore } from '@/lib/store'
 import {
   Volume2,
   VolumeX,
-  RotateCcw,
   Zap,
   Target,
   Sparkles,
@@ -43,7 +42,7 @@ export default function StudyCard({
   const [isDragging, setIsDragging] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const tts = TTSManager.getInstance()
-  const { settings } = useVocabStore()
+  const { } = useVocabStore()
 
   // Reset flip state when word changes
   useEffect(() => {
@@ -62,7 +61,8 @@ export default function StudyCard({
         case ' ':
         case 'Enter':
           e.preventDefault()
-          handleFlip()
+          setIsFlipped(prev => !prev)
+          onToggleAnswer()
           break
         case 'ArrowLeft':
           e.preventDefault()
@@ -83,14 +83,19 @@ export default function StudyCard({
           break
         case 'p':
           e.preventDefault()
-          playAudio()
+          // Play audio inline
+          if (!isPlaying && word.audio_url) {
+            setIsPlaying(true)
+            const audio = TTSManager.getInstance()
+            audio.play(word.term, word.audio_url).finally(() => setIsPlaying(false))
+          }
           break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isFlipped, canNavigate, word.id])
+  }, [isFlipped, canNavigate, word.id, word.term, word.audio_url, isPlaying, onAnswer, onNext, onPrevious, onToggleAnswer])
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped)
