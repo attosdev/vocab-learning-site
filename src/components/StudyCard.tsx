@@ -82,10 +82,10 @@ export default function StudyCard({
         case 'p':
           e.preventDefault()
           // Play audio inline
-          if (!isPlaying && word.audio_url) {
+          if (!isPlaying) {
             setIsPlaying(true)
-            const audio = TTSManager.getInstance()
-            audio.play(word.term, word.audio_url).finally(() => setIsPlaying(false))
+            const ttsManager = TTSManager.getInstance()
+            ttsManager.speakWord(word.term, word.audio_url).finally(() => setIsPlaying(false))
           }
           break
       }
